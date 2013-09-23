@@ -52,8 +52,8 @@ package artcustomer.framework.context{
 			_cpuArchitecture = Capabilities.cpuArchitecture;
 			_defaultLanguage = Capabilities.language;
 			_parameters = new Object();
-			_name = FrameworkName.DEFAULT_NAME;
-			_mode = FrameworkMode.RELEASE;
+			_name = ContextName.DEFAULT_NAME;
+			_mode = ContextMode.RELEASE;
 			_assetsPath = '';
 			
 			if (Capabilities.supports32BitProcesses) _bitsProcessesSupported = BitProcesses.SUPPORT_32_BIT;

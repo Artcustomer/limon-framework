@@ -1,11 +1,11 @@
 /**
 	 * Artcustomer - Limon Framework
-	 * 06 / 01 / 2012
+	 * 05 / 06 / 2013
 	 * 
      * @langversion 3.0
-     * @playerversion Flash 11.3
-     * @author David Massenot (http://artcustomer.fr)
-	 * @version 2.7.3.1
+     * @playerversion Flash 11.7
+     * @author David Massenot (http://artcustomer.fr/)
+	 * @version 3.0.0.0
 **/
 package {
 	import flash.display.Sprite;

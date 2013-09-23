@@ -11,17 +11,12 @@ package artcustomer.framework.core {
 	import flash.utils.Dictionary;
 	
 	import artcustomer.framework.context.*;
-	import artcustomer.framework.component.*;
+	import artcustomer.framework.engines.component.*;
+	import artcustomer.framework.data.IViewData;
 	import artcustomer.framework.errors.*;
-	import artcustomer.framework.events.FrameworkModelEvent;
+	import artcustomer.framework.events.ModelEvent;
 	
-	[Event(name = "modelSetup", type = "artcustomer.framework.events.FrameworkModelEvent")]
-	[Event(name = "modelReset", type = "artcustomer.framework.events.FrameworkModelEvent")]
-	[Event(name = "modelDestroy", type = "artcustomer.framework.events.FrameworkModelEvent")]
-	[Event(name = "modelInit", type = "artcustomer.framework.events.FrameworkModelEvent")]
-	[Event(name = "modelUpdate", type = "artcustomer.framework.events.FrameworkModelEvent")]
-	[Event(name = "modelUpdateAllViews", type = "artcustomer.framework.events.FrameworkModelEvent")]
-	[Event(name = "modelUpdateView", type = "artcustomer.framework.events.FrameworkModelEvent")]
+	[Event(name = "notifyUpdate", type = "artcustomer.framework.events.ModelEvent")]
 	
 	
 	/**
@@ -32,10 +27,12 @@ package artcustomer.framework.core {
 	public class AbstractModel {
 		private static const FULL_CLASS_NAME:String = 'artcustomer.framework.core::AbstractModel';
 		
-		private var _component:Component;
+		private var _component:IComponent;
 		private var _context:IContext;
 		
 		private var _models:Dictionary;
+		
+		private var _numModels:int;
 		
 		private var _allowSetComponent:Boolean;
 		private var _allowSetContext:Boolean;
@@ -47,6 +44,7 @@ package artcustomer.framework.core {
 		public function AbstractModel() {
 			if (getQualifiedClassName(this) == FULL_CLASS_NAME) throw new IllegalError(IllegalError.E_MODEL_CONSTRUCTOR);
 			
+			_numModels = 0;
 			_allowSetComponent = true;
 			_allowSetContext = true;
 		}
@@ -86,15 +84,13 @@ package artcustomer.framework.core {
 		 */
 		public function setup():void {
 			setupModelsStack();
-			
-			this.context.instance.dispatchEvent(new FrameworkModelEvent(FrameworkModelEvent.MODEL_SETUP, true, false, (this as IModel)));
 		}
 		
 		/**
 		 * Reset data in model. Can be overrided.
 		 */
 		public function reset():void {
-			this.context.instance.dispatchEvent(new FrameworkModelEvent(FrameworkModelEvent.MODEL_RESET, true, false, (this as IModel)));
+			
 		}
 		
 		/**
@@ -104,8 +100,7 @@ package artcustomer.framework.core {
 			clearModelsStack();
 			destroyModelsStack();
 			
-			this.context.instance.dispatchEvent(new FrameworkModelEvent(FrameworkModelEvent.MODEL_DESTROY, true, false, (this as IModel)));
-			
+			_numModels = 0;
 			_component = null;
 			_context = null;
 			_models = null;
@@ -117,37 +112,19 @@ package artcustomer.framework.core {
 		 * Initialize data in model. Can be overrided.
 		 */
 		public function init():void {
-			this.context.instance.dispatchEvent(new FrameworkModelEvent(FrameworkModelEvent.MODEL_INIT, true, false, (this as IModel)));
-		}
-		
-		/**
-		 * Call this method after update data in order to update Component. Can be overrided.
-		 */
-		public function update():void {
-			this.context.instance.dispatchEvent(new FrameworkModelEvent(FrameworkModelEvent.MODEL_UPDATE, true, false, (this as IModel)));
-		}
-		
-		/**
-		 * Call this method after update data in order to update all Views. Can be overrided.
-		 */
-		public function updateAllViews():void {
-			this.context.instance.dispatchEvent(new FrameworkModelEvent(FrameworkModelEvent.MODEL_UPDATE_ALL_VIEWS, true, false, (this as IModel)));
-		}
-		
-		/**
-		 * Call this method after update data in order to update a View. Can be overrided.
-		 * 
-		 * @param	viewID
-		 */
-		public function updateView(viewID:String):void {
-			this.context.instance.dispatchEvent(new FrameworkModelEvent(FrameworkModelEvent.MODEL_UPDATE_VIEW, true, false, (this as IModel), viewID));
-		}
-		
-		/**
-		 * Call this method after update data in order to update Component with custom event. Must be overrided.
-		 */
-		public function updateWithCustomEvent():void {
 			
+		}
+		
+		/**
+		 * Call this method after update data in order to update views in Component. Can be overrided.
+		 * 
+		 * @param	updateType : Type of the update, a string id.
+		 * @param	data : ViewData object that store the data
+		 * @param	viewID : Id of the view, if null, all views wiil be updated
+		 * @param	isViewSetup : Specified if the views would be setuped before update
+		 */
+		public function update(updateType:String, data:IViewData, viewID:String = null, isViewSetup:Boolean = true):void {
+			_component.dispatchEvent(new ModelEvent(ModelEvent.NOTIFY_UPDATE, false, false, updateType, data, viewID, isViewSetup));
 		}
 		
 		/**
@@ -162,9 +139,11 @@ package artcustomer.framework.core {
 			var model:AbstractMacroModel = new modelClass();
 			model.model = (this as IModel);
 			model.id = modelID;
-			model.setup();
 			
 			_models[modelID] = model;
+			_numModels++;
+			
+			model.setup();
 		}
 		
 		/**
@@ -184,6 +163,9 @@ package artcustomer.framework.core {
 					model = null;
 					
 					_models[id] = undefined;
+					delete _models[id];
+					
+					_numModels--;
 				}
 			} catch (er:Error) {
 				throw er;
@@ -198,7 +180,6 @@ package artcustomer.framework.core {
 		 */
 		public final function hasregisterModel(id:String):Boolean {
 			if (!id) throw new FrameworkError(FrameworkError.E_MODEL_HASREGISTER);
-			
 			if (_models[id] != undefined) return true;
 			
 			return false;
@@ -213,18 +194,14 @@ package artcustomer.framework.core {
 		public final function getModel(id:String):IMacroModel {
 			if (!id) throw new FrameworkError(FrameworkError.E_MODEL_GET);
 			
-			var model:IMacroModel = null;
-			
-			if (_models[id] != undefined) model = (_models[id] as IMacroModel);
-			
-			return model;
+			return _models[id] as IMacroModel;
 		}
 		
 		
 		/**
 		 * @private
 		 */
-		public function set component(value:Component):void {
+		public function set component(value:IComponent):void {
 			if (_allowSetComponent) {
 				_component = value;
 				
@@ -235,7 +212,7 @@ package artcustomer.framework.core {
 		/**
 		 * @private
 		 */
-		public function get component():Component {
+		public function get component():IComponent {
 			return _component;
 		}
 		
@@ -255,6 +232,13 @@ package artcustomer.framework.core {
 		 */
 		public function get context():IContext {
 			return _context;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get numModels():int {
+			return _numModels;
 		}
 	}
 }

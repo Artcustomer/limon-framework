@@ -27,10 +27,11 @@ package artcustomer.framework.utils.tools {
 		 * @return
 		 */
 		public static function formatToString(object:*, className:String, ...properties:*):String {
+			var i:int = 0
 			var s:String = '[' + className;
 			var prop:String;
 			
-			for (var i:int = 0 ; i < properties.length ; i++) {
+			for (i ; i < properties.length ; i++) {
 				prop = properties[i];
 				
 				s += ' ' + prop + '=' + object[prop];

@@ -17,11 +17,11 @@ package artcustomer.framework {
 		
 		
 		public static const PLAYER:String = 'Flash';
-		public static const RUNTIME_VERSION:String = '11.6.602.146';
+		public static const RUNTIME_VERSION:String = '11.7.700.202';
 		public static const CODE:String = 'Limon Framework';
-		public static const VERSION:String = '2.7.8.3';
+		public static const VERSION:String = '3.0.0.0';
 		public static const AUTHOR:String = 'David Massenot';
 		public static const ONLINE_DOCUMENTATION:String = 'http://framework.artcustomer.fr/';
-		public static const LAST_RELEASE_DATE:String = '18/01/2013';
+		public static const LAST_RELEASE_DATE:String = '18/06/2013';
 	}
 }

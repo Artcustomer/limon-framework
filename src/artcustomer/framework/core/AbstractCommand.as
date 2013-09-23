@@ -83,8 +83,8 @@ package artcustomer.framework.core {
 		/**
 		 * Execute command. Never be overrided.
 		 */
-		public final function execute(e:FrameworkCommandEvent):void {
-			executeMacro(e.macroCommandID, e.event);
+		public final function execute(event:Event, macroCommandID:String):void {
+			executeMacro(macroCommandID, event);
 		}
 		
 		/**
@@ -138,15 +138,12 @@ package artcustomer.framework.core {
 		public final function unregisterMacro(id:String):void {
 			if (!id) throw new FrameworkError(FrameworkError.E_MACRO_UNREGISTER);
 			
-			var macro:IMacroCommand;
-			
 			try {
 				if (_macros[id] != undefined) {
-					macro = (_macros[id] as IMacroCommand);
-					macro.destroy();
-					macro = null;
+					(_macros[id] as IMacroCommand).destroy();
 					
 					_macros[id] = undefined;
+					delete _macros[id];
 				}
 			} catch (er:Error) {
 				throw er;

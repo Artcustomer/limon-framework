@@ -6,8 +6,9 @@
  */
 
 package artcustomer.framework.core {
-	import artcustomer.framework.component.*;
 	import artcustomer.framework.context.*;
+	import artcustomer.framework.engines.component.*;
+	import artcustomer.framework.data.IViewData;
 	
 	
 	/**
@@ -20,13 +21,11 @@ package artcustomer.framework.core {
 		function reset():void
 		function destroy():void
 		function init():void
-		function update():void
-		function updateAllViews():void
-		function updateView(viewID:String):void
-		function updateWithCustomEvent():void
+		function update(updateType:String, data:IViewData, viewID:String = null, isViewSetup:Boolean = true):void
 		function hasregisterModel(id:String):Boolean
 		function getModel(id:String):IMacroModel
 		function get context():IContext
-		function get component():Component
+		function get component():IComponent
+		function get numModels():int
 	}
 }

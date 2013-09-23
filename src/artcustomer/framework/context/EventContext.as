@@ -24,7 +24,7 @@ package artcustomer.framework.context {
 	public class EventContext implements IEventDispatcher, IDestroyable {
 		private static const FULL_CLASS_NAME:String = 'artcustomer.framework.context::EventContext';
 		
-		private var _context:Context;
+		private var _context:BaseContext;
 		private var _eventDispatcher:IEventDispatcher;
 		
 		private var _allowSetContext:Boolean;
@@ -125,7 +125,7 @@ package artcustomer.framework.context {
 		/**
 		 * @private
 		 */
-		public function set instance(value:Context):void {
+		public function set instance(value:BaseContext):void {
 			if (_allowSetContext) {
 				_context = value;
 				
@@ -136,7 +136,7 @@ package artcustomer.framework.context {
 		/**
 		 * @private
 		 */
-		public function get instance():Context {
+		public function get instance():BaseContext {
 			return _context;
 		}
 	}

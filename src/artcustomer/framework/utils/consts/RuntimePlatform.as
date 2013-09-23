@@ -19,5 +19,9 @@ package artcustomer.framework.utils.consts {
 		public static const UNKNOWN_PLATFORM:String = '';
 		public static const FLASH_PLAYER:String = 'Flash';
 		public static const AIR_RUNTIME:String = 'AIR';
+		public static const ANDROID_OS:String = 'Android';
+		public static const IOS_OS:String = 'iOS';
+		public static const WINDOWS_OS:String = 'Windows';
+		public static const MAC_OS:String = 'Mac';
 	}
 }

@@ -9,9 +9,6 @@ package artcustomer.framework.context {
 	import flash.display.DisplayObjectContainer;
 	import flash.events.Event;
 	import flash.events.IEventDispatcher;
-	import flash.system.ApplicationDomain;
-	
-	import artcustomer.framework.component.Component;
 	
 	
 	/**
@@ -24,11 +21,10 @@ package artcustomer.framework.context {
 		function removeEventListener(type:String, listener:Function, useCapture:Boolean = false):void
 		function hasEventListener(type:String):Boolean
 		function dispatchEvent(e:Event):Boolean;
-		function dispatchCommand(event:Event, component:Component, macroCommandID:String):Boolean;
 		function get eventDispatcher():IEventDispatcher;
 		function get contextView():DisplayObjectContainer;
 		function get contextWidth():int;
 		function get contextHeight():int;
-		function get instance():Context;
+		function get instance():BaseContext;
 	}
 }

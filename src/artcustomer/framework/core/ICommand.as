@@ -6,7 +6,7 @@
  */
 
 package artcustomer.framework.core {
-	import artcustomer.framework.events.FrameworkCommandEvent;
+	import flash.events.Event;
 	
 	
 	/**
@@ -18,7 +18,9 @@ package artcustomer.framework.core {
 		function setup():void
 		function reset():void
 		function destroy():void
-		function execute(e:FrameworkCommandEvent):void
+		function execute(event:Event, macroCommandID:String):void
+		function hasregisterMacro(id:String):Boolean
+		function getMacro(id:String):IMacroCommand
 		function set model(value:IModel):void
 		function get model():IModel
 	}

@@ -15,20 +15,17 @@ package artcustomer.framework.context {
 	import flash.events.UncaughtErrorEvent;
 	import flash.utils.getQualifiedClassName;
 	
-	import artcustomer.framework.context.logo.*;
-	import artcustomer.framework.context.menu.*;
+	import artcustomer.framework.context.ui.logo.*;
+	import artcustomer.framework.context.ui.menu.*;
 	import artcustomer.framework.events.*;
 	import artcustomer.framework.errors.*;
 	import artcustomer.framework.utils.consts.*;
 	
-	[Event(name = "frameworkResize", type = "artcustomer.framework.events.FrameworkEvent")]
-	[Event(name = "frameworkNormalScreen", type = "artcustomer.framework.events.FrameworkEvent")]
-	[Event(name = "frameworkFullScreen", type = "artcustomer.framework.events.FrameworkEvent")]
-	[Event(name = "frameworkFocusIn", type = "artcustomer.framework.events.FrameworkEvent")]
-	[Event(name = "frameworkFocusOut", type = "artcustomer.framework.events.FrameworkEvent")]
-	[Event(name = "error", type = "artcustomer.framework.events.FrameworkErrorEvent")]
-	[Event(name = "frameworkError", type = "artcustomer.framework.events.FrameworkErrorEvent")]
-	[Event(name = "illegalError", type = "artcustomer.framework.events.FrameworkErrorEvent")]
+	[Event(name = "displayNormalScreen", type = "artcustomer.framework.events.ContextDisplayEvent")]
+	[Event(name = "displayFullScreen", type = "artcustomer.framework.events.ContextDisplayEvent")]
+	[Event(name = "error", type = "artcustomer.framework.events.ContextErrorEvent")]
+	[Event(name = "frameworkError", type = "artcustomer.framework.events.ContextErrorEvent")]
+	[Event(name = "illegalError", type = "artcustomer.framework.events.ContextErrorEvent")]
 	
 	
 	/**
@@ -36,7 +33,7 @@ package artcustomer.framework.context {
 	 * 
 	 * @author David Massenot
 	 */
-	public class InteractiveContext extends CommandContext implements IContext {
+	public class InteractiveContext extends EventContext implements IContext {
 		private static const FULL_CLASS_NAME:String = 'artcustomer.framework.context::InteractiveContext';
 		
 		private var _contextView:DisplayObjectContainer;
@@ -52,6 +49,8 @@ package artcustomer.framework.context {
 		
 		private var _logo:ContextLogo;
 		private var _menu:ContextFrameworkMenu;
+		
+		private var _contextDisplayState:String;
 		
 		private var _logoAlign:String;
 		private var _logoVerticalMargin:int;
@@ -71,10 +70,11 @@ package artcustomer.framework.context {
 			_allowSetContextView = true;
 			
 			_contextView = null;
-			_contextWidth = 1280;
-			_contextHeight = 800;
-			_contextMinWidth = 800;
-			_contextMinHeight = 600;
+			_contextWidth = ContextDisplaySize.DEFAULT_WIDTH;
+			_contextHeight = ContextDisplaySize.DEFAULT_HEIGHT;
+			_contextMinWidth = ContextDisplaySize.DEFAULT_MIN_WIDTH;
+			_contextMinHeight = ContextDisplaySize.DEFAULT_MIN_HEIGHT;
+			_contextDisplayState = ContextDisplayState.NORMAL;
 			_contextPosition = ContextPosition.TOP_LEFT;
 			_scaleToStage = true;
 			_isFullScreen = true;
@@ -159,36 +159,39 @@ package artcustomer.framework.context {
 			e.preventDefault();
 			
 			switch (e.type) {
-				case('activate'):
+				case(Event.ACTIVATE):
 					if (!_isFocusOnStage) {
 						_isFocusOnStage = true;
 						
-						this.dispatchEvent(new FrameworkEvent(FrameworkEvent.FRAMEWORK_FOCUS_IN, false, false, this, contextWidth, contextHeight, stageWidth, stageHeight));
+						this.focus();
 					}
 					break;
 					
-				case('deactivate'):
+				case(Event.DEACTIVATE):
 					if (_isFocusOnStage) {
 						_isFocusOnStage = false;
 						
-						this.dispatchEvent(new FrameworkEvent(FrameworkEvent.FRAMEWORK_FOCUS_OUT, false, false, this, contextWidth, contextHeight, stageWidth, stageHeight));
+						this.unfocus();
 					}
 					break;
 					
-				case('resize'):
+				case(Event.RESIZE):
 					setupSize(contextWidth, contextHeight);
 					refreshView();
 					setLogoPosition();
 					
-					if (this.instance) this.instance.resize();
-					if (_scaleToStage) this.dispatchEvent(new FrameworkEvent(FrameworkEvent.FRAMEWORK_RESIZE, false, false, this, contextWidth, contextHeight, stageWidth, stageHeight));
+					this.resize();
 					break;
 					
-				case('fullScreen'):
+				case(Event.FULLSCREEN):
 					if (_contextView.stage.displayState == StageDisplayState.NORMAL) {
-						this.dispatchEvent(new FrameworkEvent(FrameworkEvent.FRAMEWORK_NORMAL_SCREEN, false, false, this, contextWidth, contextHeight, stageWidth, stageHeight));
+						_contextDisplayState = ContextDisplayState.NORMAL;
+						
+						this.dispatchEvent(new ContextDisplayEvent(ContextDisplayEvent.DISPLAY_NORMAL_SCREEN, false, false, contextWidth, contextHeight, stageWidth, stageHeight, _contextDisplayState));
 					} else if (_contextView.stage.displayState == StageDisplayState.FULL_SCREEN) {
-						this.dispatchEvent(new FrameworkEvent(FrameworkEvent.FRAMEWORK_FULL_SCREEN, false, false, this, contextWidth, contextHeight, stageWidth, stageHeight));
+						_contextDisplayState = ContextDisplayState.FULL_SCREEN;
+						
+						this.dispatchEvent(new ContextDisplayEvent(ContextDisplayEvent.DISPLAY_FULL_SCREEN, false, false, contextWidth, contextHeight, stageWidth, stageHeight, _contextDisplayState));
 					}
 					break;
 					
@@ -208,19 +211,19 @@ package artcustomer.framework.context {
 			var errorName:String = ErrorName.FLASH_ERROR;
 			var frameworkError:int = errorID / FrameworkError.ERROR_ID;
 			var illegalError:int = errorID / IllegalError.ERROR_ID;
-			var eventType:String = FrameworkErrorEvent.ERROR;
+			var eventType:String = ContextErrorEvent.ERROR;
 			
 			if (frameworkError == 1) {
-				eventType = FrameworkErrorEvent.FRAMEWORK_ERROR;
+				eventType = ContextErrorEvent.FRAMEWORK_ERROR;
 				errorName = ErrorName.FRAMEWORK_ERROR;
 			}
 			
 			if (illegalError == 1) {
-				eventType = FrameworkErrorEvent.ILLEGAL_ERROR;
+				eventType = ContextErrorEvent.ILLEGAL_ERROR;
 				errorName = ErrorName.ILLEGAL_ERROR;
 			}
 			
-			this.dispatchEvent(new FrameworkErrorEvent(eventType, true, false, error, errorName))
+			this.dispatchEvent(new ContextErrorEvent(eventType, true, false, error, errorName))
 		}
 		
 		//---------------------------------------------------------------------
@@ -365,6 +368,27 @@ package artcustomer.framework.context {
 			}
 		}
 		
+		/**
+		 * When player window is resized.
+		 */
+		protected function resize():void {
+			
+		}
+		
+		/**
+		 * When FlashPlayer receive focus. Can be overrided.
+		 */
+		protected function focus():void {
+			
+		}
+		
+		/**
+		 * When FlashPlayer lose focus. Can be overrided.
+		 */
+		protected function unfocus():void {
+			
+		}
+		
 		
 		/**
 		 * Setup InteractiveContext.
@@ -398,6 +422,7 @@ package artcustomer.framework.context {
 			_contextHeight = 0;
 			_contextMinWidth = 0;
 			_contextMinHeight = 0;
+			_contextDisplayState = null;
 			_contextPosition = null;
 			_scaleToStage = false;
 			_viewPortContainer = null;
@@ -645,6 +670,13 @@ package artcustomer.framework.context {
 		 */
 		public function get scaleToStage():Boolean {
 			return _scaleToStage;
+		}
+		
+		/**
+		 * @private
+		 */
+		public function get contextDisplayState():String {
+			return _contextDisplayState;
 		}
 		
 		/**

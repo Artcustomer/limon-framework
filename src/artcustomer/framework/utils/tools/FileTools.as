@@ -22,8 +22,18 @@ package artcustomer.framework.utils.tools {
 		 * @param file
 		 * @return String extension
 		 */
-		public static function getExtension(file:String):String {			
+		public static function getExtension(file:String):String {
 			return file.substring(file.lastIndexOf('.') + 1, file.length);
+		}
+		
+		/**
+		 * Get a file in a path
+		 * 
+		 * @param path
+		 * @return String file
+		 */
+		public static function resolveFileInPath(path:String):String {
+			return path.substr(path.lastIndexOf('/') + 1);
 		}
 	}
 }

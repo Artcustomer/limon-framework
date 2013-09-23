@@ -30,6 +30,11 @@ package artcustomer.framework.errors {
 		public static const E_COMPONENT_GET:String = "Can't get Component without ID !";
 		public static const E_COMPONENT_HAS:String = "Can't test Component without ID !";
 		
+		public static const E_STARLINGCOMPONENT_ADD:String = "Can't add StarlingComponent with null param !";
+		public static const E_STARLINGCOMPONENT_REMOVE:String = "Can't remove StarlingComponent without ID !";
+		public static const E_STARLINGCOMPONENT_GET:String = "Can't get StarlingComponent without ID !";
+		public static const E_STARLINGCOMPONENT_HAS:String = "Can't test StarlingComponent without ID !";
+		
 		public static const E_MANAGER_ADD:String = "Can't add Manager with null param !";
 		public static const E_MANAGER_REMOVE:String = "Can't remove Manager without ID !";
 		public static const E_MANAGER_GET:String = "Can't get Manager without ID !";
@@ -65,13 +70,17 @@ package artcustomer.framework.errors {
 		public static const E_VIEW_REGISTER:String = "Can't register view with null param !";
 		public static const E_VIEW_UNREGISTER:String = "Can't unregister view without view !";
 		public static const E_VIEW_ADD:String = "Can't add view without id !";
+		public static const E_VIEW_REMOVE:String = "Can't add view without id !";
 		public static const E_VIEW_SETUP:String = "Can't setup view without id !";
 		public static const E_VIEW_RESET:String = "Can't reset view without id !";
 		public static const E_VIEW_GET:String = "Can't get view without id !";
 		public static const E_VIEW_HAS:String = "Can't test view without id !";
 		public static const E_VIEW_GET_OUT_OF_RANGE:String = "Index is out of range !";
+		public static const E_VIEW_ALREADY_EXIST:String = "View already exist with this id : ";
 		
 		public static const E_RENDERENGINE_CREATE:String = "RenderEngine is singleton ! Use static method to get it !";
+		
+		public static const E_ASSETS_PATH_DONT_EXIST:String = "Can't resolve assets path !";
 		
 		
 		/**
